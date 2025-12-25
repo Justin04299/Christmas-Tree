@@ -11,12 +11,11 @@
   "dependencies": {
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
-    "@react-three/fiber": "^9.4.2",
-    "@react-three/postprocessing": "^3.0.4",
-    "@react-three/drei": "^10.7.7",
-    "lucide-react": "^0.562.0",
-    "three": "^0.182.0",
-    "this": "^1.1.0"
+    "three": "0.170.0",
+    "@react-three/fiber": "9.0.0-rc.0",
+    "@react-three/drei": "10.0.0-beta.9",
+    "@react-three/postprocessing": "2.16.2",
+    "lucide-react": "0.460.0"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",

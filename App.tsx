@@ -1,5 +1,5 @@
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera, Environment, Stars, Sparkles } from '@react-three/drei';
 import { EffectComposer, Bloom, Noise, Vignette } from '@react-three/postprocessing';
@@ -50,46 +50,50 @@ const App: React.FC = () => {
 
   return (
     <div className="w-full h-screen bg-[#000504] relative overflow-hidden">
-      {/* Background Ambience */}
-      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,_transparent_0%,_#000_100%)] z-10 opacity-80" />
+      {/* Background Ambience - Low Z-Index to stay behind UI */}
+      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,_transparent_0%,_#000_100%)] z-0 opacity-80" />
 
       {/* 3D Scene */}
-      <Canvas shadows gl={{ antialias: false, alpha: false }}>
-        <PerspectiveCamera makeDefault position={[0, 5, 30]} fov={40} />
-        
-        <color attach="background" args={['#000504']} />
-        <fog attach="fog" args={['#000504', 15, 65]} />
+      <div className="absolute inset-0 z-10">
+        <Canvas shadows gl={{ antialias: false, alpha: false }}>
+          <PerspectiveCamera makeDefault position={[0, 5, 30]} fov={40} />
+          
+          <color attach="background" args={['#000504']} />
+          <fog attach="fog" args={['#000504', 15, 65]} />
 
-        <Environment preset="night" />
-        
-        <Stars radius={100} depth={50} count={10000} factor={4} saturation={0.5} fade speed={1} />
-        <Sparkles count={500} scale={30} size={1.5} speed={0.3} color={COLORS.GOLD_BRIGHT} opacity={0.5} />
+          <Environment preset="night" />
+          
+          <Stars radius={100} depth={50} count={10000} factor={4} saturation={0.5} fade speed={1} />
+          <Sparkles count={500} scale={30} size={1.5} speed={0.3} color={COLORS.GOLD_BRIGHT} opacity={0.5} />
 
-        <pointLight position={[50, 50, -50]} intensity={1} color="#4b0082" />
-        <pointLight position={[0, 15, 10]} intensity={2.5} color={COLORS.GOLD_BRIGHT} />
-        <spotLight position={[0, 25, 10]} angle={0.2} penumbra={1} intensity={3} castShadow />
+          <pointLight position={[50, 50, -50]} intensity={1} color="#4b0082" />
+          <pointLight position={[0, 15, 10]} intensity={2.5} color={COLORS.GOLD_BRIGHT} />
+          <spotLight position={[0, 25, 10]} angle={0.2} penumbra={1} intensity={3} castShadow />
 
-        <Experience 
-          treeState={treeState} 
-          handData={handData} 
-        />
+          <Suspense fallback={null}>
+            <Experience 
+              treeState={treeState} 
+              handData={handData} 
+            />
+          </Suspense>
 
-        <EffectComposer disableNormalPass>
-          <Bloom luminanceThreshold={0.7} mipmapBlur intensity={1.5} radius={0.3} />
-          <Noise opacity={0.08} />
-          <Vignette eskil={false} offset={0.05} darkness={1.2} />
-        </EffectComposer>
+          <EffectComposer disableNormalPass>
+            <Bloom luminanceThreshold={0.7} mipmapBlur intensity={1.5} radius={0.3} />
+            <Noise opacity={0.08} />
+            <Vignette eskil={false} offset={0.05} darkness={1.2} />
+          </EffectComposer>
 
-        <OrbitControls 
-          enablePan={false} 
-          minDistance={10} 
-          maxDistance={50} 
-          maxPolarAngle={Math.PI / 1.7}
-          target={[0, 0, 0]}
-          autoRotate={treeState === TreeState.FORMED}
-          autoRotateSpeed={0.5}
-        />
-      </Canvas>
+          <OrbitControls 
+            enablePan={false} 
+            minDistance={10} 
+            maxDistance={50} 
+            maxPolarAngle={Math.PI / 1.7}
+            target={[0, 0, 0]}
+            autoRotate={treeState === TreeState.FORMED}
+            autoRotateSpeed={0.5}
+          />
+        </Canvas>
+      </div>
 
       {/* Header UI */}
       <div className="absolute top-0 left-0 w-full p-6 md:p-10 flex justify-between items-start pointer-events-none z-20">
@@ -115,7 +119,6 @@ const App: React.FC = () => {
                 Chaos
               </button>
             </div>
-            <span className="ml-3 text-[#D4AF37]/20 text-[8px] uppercase tracking-widest hidden md:block">Manual Toggle</span>
           </div>
         </div>
       </div>
