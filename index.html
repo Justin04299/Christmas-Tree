@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Grand Luxury Interactive Christmas Tree</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- MediaPipe Hands & Camera Utils -->
+    <!-- MediaPipe Hands & Camera Utils - Pinned Versions for Stability -->
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1646424915/hands.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
     <style>
@@ -14,57 +14,30 @@
         body {
             margin: 0;
             overflow: hidden;
-            background-color: #000504;
+            background-color: #011a12;
             font-family: 'Playfair Display', serif;
-            color: #D4AF37;
         }
         .luxury-text {
             font-family: 'Cinzel', serif;
-        }
-        #loading-overlay {
-            position: fixed;
-            inset: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: #000504;
-            z-index: 9999;
-            transition: opacity 0.5s ease;
         }
     </style>
 <script type="importmap">
 {
   "imports": {
-    "react": "https://esm.sh/react@19.0.0",
-    "react-dom": "https://esm.sh/react-dom@19.0.0",
-    "react-dom/client": "https://esm.sh/react-dom@19.0.0/client",
-    "three": "https://esm.sh/three@0.170.0",
-    "@react-three/fiber": "https://esm.sh/@react-three/fiber@9.0.0-rc.0",
-    "@react-three/drei": "https://esm.sh/@react-three/drei@10.0.0-beta.9",
-    "@react-three/postprocessing": "https://esm.sh/@react-three/postprocessing@2.16.2",
-    "lucide-react": "https://esm.sh/lucide-react@0.460.0",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3",
     "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "react/": "https://esm.sh/react@^19.2.3/"
+    "@react-three/fiber": "https://esm.sh/@react-three/fiber@^9.4.2",
+    "@react-three/postprocessing": "https://esm.sh/@react-three/postprocessing@^3.0.4",
+    "@react-three/drei": "https://esm.sh/@react-three/drei@^10.7.7",
+    "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
+    "three": "https://esm.sh/three@^0.182.0",
+    "this": "https://esm.sh/this@^1.1.0"
   }
 }
 </script>
 </head>
 <body>
-    <div id="loading-overlay">
-        <div class="luxury-text text-xl mb-4 animate-pulse">Initializing Cosmic Gala...</div>
-        <div class="w-48 h-1 bg-white/10 rounded-full overflow-hidden">
-            <div class="w-full h-full bg-[#D4AF37] origin-left animate-[loading_2s_ease-in-out_infinite]"></div>
-        </div>
-        <style>
-            @keyframes loading {
-                0% { transform: scaleX(0); }
-                50% { transform: scaleX(1); }
-                100% { transform: scaleX(0); transform-origin: right; }
-            }
-        </style>
-    </div>
     <div id="root"></div>
-    <script type="module" src="./index.tsx"></script>
 </body>
 </html>

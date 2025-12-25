@@ -1,5 +1,5 @@
 
-import React, { useState, useCallback, Suspense } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera, Environment, Stars, Sparkles } from '@react-three/drei';
 import { EffectComposer, Bloom, Noise, Vignette } from '@react-three/postprocessing';
@@ -12,6 +12,7 @@ import { TreePine, Sparkles as SparklesIcon, Hand } from 'lucide-react';
 const App: React.FC = () => {
   const [treeState, setTreeState] = useState<TreeState>(TreeState.FORMED);
   const [handData, setHandData] = useState<HandData>({ isOpen: false, x: 0, y: 0, isDetected: false });
+  const [showOverlay, setShowOverlay] = useState(true);
 
   const handleHandUpdate = useCallback((data: HandData) => {
     setHandData(data);
@@ -22,6 +23,10 @@ const App: React.FC = () => {
 
   const toggleState = (state: TreeState) => {
     setTreeState(state);
+  };
+
+  const handleEnter = () => {
+    setShowOverlay(false);
   };
 
   const getInstruction = () => {
@@ -50,50 +55,46 @@ const App: React.FC = () => {
 
   return (
     <div className="w-full h-screen bg-[#000504] relative overflow-hidden">
-      {/* Background Ambience - Low Z-Index to stay behind UI */}
-      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,_transparent_0%,_#000_100%)] z-0 opacity-80" />
+      {/* Background Ambience */}
+      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,_transparent_0%,_#000_100%)] z-10 opacity-80" />
 
       {/* 3D Scene */}
-      <div className="absolute inset-0 z-10">
-        <Canvas shadows gl={{ antialias: false, alpha: false }}>
-          <PerspectiveCamera makeDefault position={[0, 5, 30]} fov={40} />
-          
-          <color attach="background" args={['#000504']} />
-          <fog attach="fog" args={['#000504', 15, 65]} />
+      <Canvas shadows gl={{ antialias: false, alpha: false }}>
+        <PerspectiveCamera makeDefault position={[0, 5, 30]} fov={40} />
+        
+        <color attach="background" args={['#000504']} />
+        <fog attach="fog" args={['#000504', 15, 65]} />
 
-          <Environment preset="night" />
-          
-          <Stars radius={100} depth={50} count={10000} factor={4} saturation={0.5} fade speed={1} />
-          <Sparkles count={500} scale={30} size={1.5} speed={0.3} color={COLORS.GOLD_BRIGHT} opacity={0.5} />
+        <Environment preset="night" />
+        
+        <Stars radius={100} depth={50} count={10000} factor={4} saturation={0.5} fade speed={1} />
+        <Sparkles count={500} scale={30} size={1.5} speed={0.3} color={COLORS.GOLD_BRIGHT} opacity={0.5} />
 
-          <pointLight position={[50, 50, -50]} intensity={1} color="#4b0082" />
-          <pointLight position={[0, 15, 10]} intensity={2.5} color={COLORS.GOLD_BRIGHT} />
-          <spotLight position={[0, 25, 10]} angle={0.2} penumbra={1} intensity={3} castShadow />
+        <pointLight position={[50, 50, -50]} intensity={1} color="#4b0082" />
+        <pointLight position={[0, 15, 10]} intensity={2.5} color={COLORS.GOLD_BRIGHT} />
+        <spotLight position={[0, 25, 10]} angle={0.2} penumbra={1} intensity={3} castShadow />
 
-          <Suspense fallback={null}>
-            <Experience 
-              treeState={treeState} 
-              handData={handData} 
-            />
-          </Suspense>
+        <Experience 
+          treeState={treeState} 
+          handData={handData} 
+        />
 
-          <EffectComposer disableNormalPass>
-            <Bloom luminanceThreshold={0.7} mipmapBlur intensity={1.5} radius={0.3} />
-            <Noise opacity={0.08} />
-            <Vignette eskil={false} offset={0.05} darkness={1.2} />
-          </EffectComposer>
+        <EffectComposer disableNormalPass>
+          <Bloom luminanceThreshold={0.7} mipmapBlur intensity={1.5} radius={0.3} />
+          <Noise opacity={0.08} />
+          <Vignette eskil={false} offset={0.05} darkness={1.2} />
+        </EffectComposer>
 
-          <OrbitControls 
-            enablePan={false} 
-            minDistance={10} 
-            maxDistance={50} 
-            maxPolarAngle={Math.PI / 1.7}
-            target={[0, 0, 0]}
-            autoRotate={treeState === TreeState.FORMED}
-            autoRotateSpeed={0.5}
-          />
-        </Canvas>
-      </div>
+        <OrbitControls 
+          enablePan={false} 
+          minDistance={10} 
+          maxDistance={50} 
+          maxPolarAngle={Math.PI / 1.7}
+          target={[0, 0, 0]}
+          autoRotate={treeState === TreeState.FORMED}
+          autoRotateSpeed={0.5}
+        />
+      </Canvas>
 
       {/* Header UI */}
       <div className="absolute top-0 left-0 w-full p-6 md:p-10 flex justify-between items-start pointer-events-none z-20">
@@ -119,6 +120,7 @@ const App: React.FC = () => {
                 Chaos
               </button>
             </div>
+            <span className="ml-3 text-[#D4AF37]/20 text-[8px] uppercase tracking-widest hidden md:block">Manual Toggle</span>
           </div>
         </div>
       </div>
@@ -150,6 +152,26 @@ const App: React.FC = () => {
       <div className="absolute bottom-4 right-4 w-28 h-20 md:w-36 md:h-26 bg-black/80 backdrop-blur-xl rounded-lg border border-white/5 overflow-hidden z-30 shadow-2xl opacity-50 hover:opacity-100 transition-all duration-500">
         <HandTracker onUpdate={handleHandUpdate} />
       </div>
+
+      {/* Entry Overlay */}
+      {showOverlay && (
+        <div className="absolute inset-0 z-50 bg-[#000] flex flex-col items-center justify-center p-6 text-center">
+            <div className="relative mb-8">
+               <TreePine size={60} className="text-[#FFD700] animate-pulse relative z-10" />
+               <div className="absolute inset-0 bg-[#FFD700] blur-[40px] opacity-10" />
+            </div>
+            <h2 className="luxury-text text-3xl md:text-5xl text-[#D4AF37] mb-4 tracking-[0.2em]">EXPERIENCE</h2>
+            <p className="max-w-xs text-[#D4AF37]/50 mb-10 leading-relaxed text-xs tracking-widest uppercase font-light">
+              Interact with the celestial void using your gestures.
+            </p>
+            <button 
+              onClick={handleEnter}
+              className="px-10 py-3 bg-white text-black rounded-full luxury-text font-bold text-xs hover:bg-[#D4AF37] transition-all transform hover:scale-105 shadow-[0_0_30px_rgba(255,255,255,0.1)] pointer-events-auto tracking-[0.2em]"
+            >
+              Enter Gala
+            </button>
+        </div>
+      )}
     </div>
   );
 };

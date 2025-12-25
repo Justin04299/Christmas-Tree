@@ -6,6 +6,7 @@ interface HandTrackerProps {
   onUpdate: (data: HandData) => void;
 }
 
+// Access globals from window
 declare global {
   interface Window {
     Hands: any;
@@ -22,24 +23,17 @@ const HandTracker: React.FC<HandTrackerProps> = ({ onUpdate }) => {
   useEffect(() => {
     let cameraInstance: any = null;
     let handsInstance: any = null;
-    let isMounted = true;
-    let retryCount = 0;
 
     const initMediaPipe = async () => {
       if (!videoRef.current || !canvasRef.current) return;
 
       try {
+        // Ensure MediaPipe is loaded from the window object
         const HandsClass = window.Hands;
         const CameraClass = window.Camera;
 
-        // If scripts are still loading, wait and retry
         if (!HandsClass || !CameraClass) {
-          if (retryCount < 10) {
-            retryCount++;
-            setTimeout(initMediaPipe, 1000);
-            return;
-          }
-          setError("Vision modules failed to load. Please refresh.");
+          setError("MediaPipe libraries not loaded. Please refresh.");
           return;
         }
 
@@ -57,7 +51,7 @@ const HandTracker: React.FC<HandTrackerProps> = ({ onUpdate }) => {
         });
 
         handsInstance.onResults((results: any) => {
-          if (!isMounted || !canvasRef.current) return;
+          if (!canvasRef.current) return;
           setIsInitializing(false);
 
           const canvasCtx = canvasRef.current.getContext('2d');
@@ -69,6 +63,8 @@ const HandTracker: React.FC<HandTrackerProps> = ({ onUpdate }) => {
           
           if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
             const landmarks = results.multiHandLandmarks[0];
+            
+            // Logic: Calculate distance from palm center (0) to finger tips
             const getDist = (p1: any, p2: any) => Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
             
             const palm = landmarks[0];
@@ -77,6 +73,7 @@ const HandTracker: React.FC<HandTrackerProps> = ({ onUpdate }) => {
             const ringTip = landmarks[16];
             const pinkyTip = landmarks[20];
             
+            // Average distance of the 4 main fingers to the palm base
             const avgDist = (
               getDist(palm, indexTip) + 
               getDist(palm, middleTip) + 
@@ -84,6 +81,7 @@ const HandTracker: React.FC<HandTrackerProps> = ({ onUpdate }) => {
               getDist(palm, pinkyTip)
             ) / 4;
             
+            // Threshold for "open" hand: fingers significantly away from palm
             const isOpen = avgDist > 0.32; 
             
             onUpdate({
@@ -93,6 +91,7 @@ const HandTracker: React.FC<HandTrackerProps> = ({ onUpdate }) => {
               isDetected: true
             });
 
+            // Draw visual feedback dots
             canvasCtx.fillStyle = isOpen ? '#FFD700' : '#043927';
             landmarks.forEach((point: any) => {
                canvasCtx.beginPath();
@@ -117,17 +116,14 @@ const HandTracker: React.FC<HandTrackerProps> = ({ onUpdate }) => {
 
         await cameraInstance.start();
       } catch (err) {
-        if (isMounted) {
-          console.error("Camera failed to start:", err);
-          setError("Camera access denied or unavailable.");
-        }
+        console.error("Camera failed to start:", err);
+        setError("Camera access denied or unavailable.");
       }
     };
 
     initMediaPipe();
 
     return () => {
-      isMounted = false;
       if (cameraInstance) cameraInstance.stop();
       if (handsInstance) handsInstance.close();
     };
@@ -141,7 +137,7 @@ const HandTracker: React.FC<HandTrackerProps> = ({ onUpdate }) => {
       {isInitializing && !error && (
         <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center p-4 text-center">
           <div className="w-6 h-6 border-2 border-[#D4AF37] border-t-transparent rounded-full animate-spin mb-2"></div>
-          <span className="text-[10px] text-[#D4AF37] uppercase tracking-tighter">Initializing AI...</span>
+          <span className="text-[10px] text-[#D4AF37] uppercase tracking-tighter">Waking AI...</span>
         </div>
       )}
 
